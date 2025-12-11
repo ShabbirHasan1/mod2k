@@ -22,12 +22,11 @@ macro_rules! define_type {
             value: $native,
         }
 
-        crate::macros::define_type_basics!($ty as $native);
+        crate::macros::define_type_basics!($ty as $native, shr = true);
 
         impl $ty {
             const MODULUS: $native = $native::MAX;
             const CARMICHAEL: u64 = $carmichael;
-            const IS_PRIME: bool = false;
 
             /// Create a value corresponding to `x mod (2^k - 1)`.
             #[inline]
@@ -129,6 +128,8 @@ macro_rules! define_type {
                 // LLVM optimizes out the "extended" part of the Euclidian algorithm.
                 self.inverse().is_some()
             }
+
+            crate::macros::define_exgcd_inverse!(false);
         }
 
         impl Add for $ty {
@@ -231,14 +232,8 @@ macro_rules! define_type {
         mod $test_mod {
             use super::$ty;
 
-            crate::macros::test_ty!($ty as $native, $signed);
-
-            #[test]
-            fn raw() {
-                for x in -10..10 {
-                    assert_eq!($ty::new(x as $native).to_raw(), x as $native);
-                }
-            }
+            crate::macros::test_ty!($ty as $native, $signed, shr = true);
+            crate::macros::test_exact_raw!($ty as $native);
         }
     };
 }

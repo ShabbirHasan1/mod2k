@@ -126,76 +126,81 @@ macro_rules! forward_shift_op {
 }
 pub(crate) use forward_shift_op;
 
+macro_rules! define_exgcd_inverse {
+    ($is_prime:literal) => {
+        /// Compute multiplicative inverse.
+        ///
+        /// Returns `None` if `x` is not coprime with `2^k - 1`.
+        ///
+        /// The current implementation uses the iterative binary extended Euclidian algorithm and
+        /// works in `O(k)`.
+        pub fn inverse(self) -> Option<Self> {
+            if self.value == 0 {
+                return None;
+            }
+
+            let mut x = self.value;
+            let mut y = Self::MODULUS;
+
+            // Binary extended Euclidian algorithm a la https://eprint.iacr.org/2020/972.pdf
+            // (Optimized Binary GCD for Modular Inversion, Thomas Pornin).
+            //
+            // At each step, `a_i x_i + b_i y_i = d`, where `d = (x, y)`.
+            //
+            // The values `a_1, b_1` are initially unknown. We only know that at the end,
+            // `a_n = 0, b_n = 1`. As `x_i, y_i` are updated over the course of the algorithm,  we
+            // learn how `a_i, b_i` depends on `a_{i+1}, b_{i+1}`. The dependency is linear:
+            //
+            //     (a_i \\ b_i) = A_i * (a_{i+1} \\ b_{i+1})
+            //     (a_1 \\ b_1) = A_1 * A_2 * ... * A_{n-1} * (0 \\ 1)
+            //
+            // Since we are only interested in `a`, we can compute
+            //
+            //     a_1 = (1 0) * A_1 * A_2 * ... * A_{n-1} * (0 \\ 1)
+            //
+            // and iteratively multiply the covector `(s t) = (1 0)` by matrices `A_i`.
+            //
+            // For binary Euclidian algorithm, `A_i` can contain division by powers of two, so both
+            // `A_i` and `(s t)` are computed modulo `m`, since we're only interested in `a mod m`
+            // anyway and dividing by two `mod m` is cheap.
+
+            let mut s = Self::ONE;
+            let mut t = Self::ZERO;
+
+            // At the start of each iteration, `x` is non-zero and `y` is odd.
+            while x != 0 {
+                // Teach the optimizer that `k` is small.
+                // SAFETY: Initially, `max(x, y) <= MODULUS`. Each iteration can only reduce the
+                // maximum.
+                unsafe {
+                    core::hint::assert_unchecked(x <= Self::MODULUS);
+                }
+                let k = x.trailing_zeros();
+                x >>= k;
+                s >>= k;
+                if x < y {
+                    core::mem::swap(&mut x, &mut y);
+                    core::mem::swap(&mut s, &mut t);
+                }
+                x -= y;
+                s -= t;
+            }
+
+            let is_invertible = $is_prime || y == 1;
+            is_invertible.then_some(t)
+        }
+    };
+}
+pub(crate) use define_exgcd_inverse;
+
 macro_rules! define_type_basics {
-    ($ty:ident as $native:ident) => {
+    ($ty:ident as $native:ident, shr = $shr:tt) => {
         impl $ty {
             /// A constant `0` value.
             pub const ZERO: Self = Self { value: 0 };
 
             /// A constant `1` value.
             pub const ONE: Self = Self { value: 1 };
-
-            /// Compute multiplicative inverse.
-            ///
-            /// Returns `None` if `x` is not coprime with `2^k - 1`.
-            ///
-            /// The current implementation uses the iterative binary extended Euclidian algorithm
-            /// and works in `O(k)`.
-            pub fn inverse(self) -> Option<Self> {
-                if self.value == 0 {
-                    return None;
-                }
-
-                let mut x = self.value;
-                let mut y = Self::MODULUS;
-
-                // Binary extended Euclidian algorithm a la https://eprint.iacr.org/2020/972.pdf
-                // (Optimized Binary GCD for Modular Inversion, Thomas Pornin).
-                //
-                // At each step, `a_i x_i + b_i y_i = d`, where `d = (x, y)`.
-                //
-                // The values `a_1, b_1` are initially unknown. We only know that at the end,
-                // `a_n = 0, b_n = 1`. As `x_i, y_i` are updated over the course of the algorithm,
-                // we learn how `a_i, b_i` depends on `a_{i+1}, b_{i+1}`. The dependency is linear:
-                //
-                //     (a_i \\ b_i) = A_i * (a_{i+1} \\ b_{i+1})
-                //     (a_1 \\ b_1) = A_1 * A_2 * ... * A_{n-1} * (0 \\ 1)
-                //
-                // Since we are only interested in `a`, we can compute
-                //
-                //     a_1 = (1 0) * A_1 * A_2 * ... * A_{n-1} * (0 \\ 1)
-                //
-                // and iteratively multiply the covector `(s t) = (1 0)` by matrices `A_i`.
-                //
-                // For binary Euclidian algorithm, `A_i` can contain division by powers of two, so
-                // both `A_i` and `(s t)` are computed modulo `m`, since we're only interested in
-                // `a mod m` anyway and dividing by two `mod m` is cheap.
-
-                let mut s = Self::ONE;
-                let mut t = Self::ZERO;
-
-                // At the start of each iteration, `x` is non-zero and `y` is odd.
-                while x != 0 {
-                    // Teach the optimizer that `k` is small.
-                    // SAFETY: Initially, `max(x, y) <= MODULUS`. Each iteration can only reduce
-                    // the maximum.
-                    unsafe {
-                        core::hint::assert_unchecked(x <= $ty::MODULUS);
-                    }
-                    let k = x.trailing_zeros();
-                    x >>= k;
-                    s >>= k;
-                    if x < y {
-                        core::mem::swap(&mut x, &mut y);
-                        core::mem::swap(&mut s, &mut t);
-                    }
-                    x -= y;
-                    s -= t;
-                }
-
-                let is_invertible = Self::IS_PRIME || y == 1;
-                is_invertible.then_some(t)
-            }
 
             // Shared among fast and prime moduli.
             fn pow_internal(self, mut n: u64) -> Self {
@@ -241,6 +246,8 @@ macro_rules! define_type_basics {
         }
 
         $crate::macros::forward_shift_op!($ty, Shl::shl, ShlAssign::shl_assign);
+
+        #[cfg($shr)]
         $crate::macros::forward_shift_op!($ty, Shr::shr, ShrAssign::shr_assign);
 
         impl Eq for $ty {}
@@ -318,7 +325,7 @@ pub(crate) use define_type_basics;
 
 #[cfg(test)]
 macro_rules! test_ty {
-    ($ty:ident as $native:ident, $signed:ident) => {
+    ($ty:ident as $native:ident, $signed:ident, shr = $shr:tt) => {
         fn numbers() -> impl Iterator<Item = $ty> {
             // Range limited so that the product of two numbers fits in $signed for testing.
             (-11..=11).map(|x| $ty::new(x as $native))
@@ -326,7 +333,7 @@ macro_rules! test_ty {
 
         fn to_signed(x: $ty) -> $signed {
             let x = x.to_raw();
-            if x <= $ty::MODULUS / 2 {
+            if x <= $ty::MODULUS.wrapping_sub(1) / 2 {
                 x as $signed
             } else {
                 x.wrapping_sub($ty::MODULUS) as $signed
@@ -334,7 +341,12 @@ macro_rules! test_ty {
         }
 
         fn from_signed(x: $signed) -> $ty {
-            $ty::new((x as i128).rem_euclid($ty::MODULUS as i128) as $native)
+            if $ty::MODULUS == 0 {
+                // Full power-of-two modulus
+                $ty::new(x as $native)
+            } else {
+                $ty::new((x as i128).rem_euclid($ty::MODULUS as i128) as $native)
+            }
         }
 
         #[test]
@@ -352,8 +364,11 @@ macro_rules! test_ty {
         #[test]
         fn remainder() {
             for x in -10..10 {
-                let x = x as $native;
-                assert_eq!($ty::new(x).remainder(), x % $ty::MODULUS);
+                let mut x = x as $native;
+                if $ty::MODULUS != 0 {
+                    x %= $ty::MODULUS;
+                }
+                assert_eq!($ty::new(x).remainder(), x);
             }
         }
 
@@ -400,12 +415,16 @@ macro_rules! test_ty {
                     macro_rules! assert_for_shift_ty {
                         ($shift_ty:ty) => {
                             assert_eq!(x << shift as $shift_ty, expected);
+                            #[cfg($shr)]
                             assert_eq!(expected >> shift as $shift_ty, x);
                         };
                         (signed $shift_ty:ty) => {
                             assert_for_shift_ty!($shift_ty);
-                            assert_eq!(x >> -(shift as $shift_ty), expected);
-                            assert_eq!(expected << -(shift as $shift_ty), x);
+                            #[cfg($shr)]
+                            {
+                                assert_eq!(x >> -(shift as $shift_ty), expected);
+                                assert_eq!(expected << -(shift as $shift_ty), x);
+                            }
                         };
                     }
 
@@ -425,10 +444,18 @@ macro_rules! test_ty {
                 let mut tmp = x;
                 for n in 0..100 {
                     assert_eq!(tmp, x << n);
+                    #[cfg($shr)]
                     assert_eq!(tmp >> n, x);
                     tmp += tmp;
                 }
             }
+        }
+
+        #[cfg(not($shr))]
+        #[test]
+        #[should_panic]
+        fn negative_shl() {
+            let _ = $ty::ZERO << -1;
         }
 
         #[test]
@@ -443,7 +470,7 @@ macro_rules! test_ty {
                 let sx = to_signed(x);
                 assert_eq!(x.is_zero(), sx == 0);
                 assert_eq!(x.is::<0>(), sx == 0);
-                assert_eq!(x.is::<{ $ty::MODULUS - 1 }>(), sx == -1);
+                assert_eq!(x.is::<{ $ty::MODULUS.wrapping_sub(1) }>(), sx == -1);
                 assert_eq!(x.is::<5>(), sx == 5);
             }
 
@@ -517,7 +544,7 @@ macro_rules! test_ty {
                     assert_eq!(x * y, $ty::ONE);
                 } else {
                     assert!(!x.is_invertible());
-                    assert!(has_common_divisor(x.to_raw(), $ty::MODULUS));
+                    assert!(has_common_divisor(x.to_raw(), if $ty::MODULUS == 0 { 2 } else { $ty::MODULUS }));
                 }
             }
         }
@@ -571,3 +598,18 @@ macro_rules! test_ty {
 
 #[cfg(test)]
 pub(crate) use test_ty;
+
+#[cfg(test)]
+macro_rules! test_exact_raw {
+    ($ty:ident as $native:ident) => {
+        #[test]
+        fn raw() {
+            for x in -10..10 {
+                assert_eq!($ty::new(x as $native).to_raw(), x as $native);
+            }
+        }
+    };
+}
+
+#[cfg(test)]
+pub(crate) use test_exact_raw;

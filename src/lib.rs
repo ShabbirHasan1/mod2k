@@ -1,4 +1,4 @@
-//! Fast arithmetic modulo `2^k - 1`.
+//! Fast arithmetic modulo `2^k` and `2^k - 1`.
 //!
 //! Modular arithmetic is useful for fast hashing, verification of polynomial operations, and as
 //! a field balancing the cost of division with the cost of other operations. Different moduli make
@@ -16,15 +16,16 @@
 //!    do not support division by two.
 //!
 //! The general-purpose [num-modular] crate implements (1). This crate provides highly optimized
-//! implementations of (2) and (3) with uniform interface to allow you to play with different
+//! implementations of (2), (3), and (4) with uniform interface to allow you to play with different
 //! options and choose the best one. The supported moduli are:
 //!
-//! - Prime: `2^7 - 1`, `2^13 - 1`, `2^31 - 1`, `2^61 - 1`.
-//! - Fast: `2^8 - 1`, `2^16 - 1`, `2^32 - 1`, `2^64 - 1`.
+//! - Primes: `2^7 - 1`, `2^13 - 1`, `2^31 - 1`, `2^61 - 1`.
+//! - "Fast": `2^8 - 1`, `2^16 - 1`, `2^32 - 1`, `2^64 - 1`.
+//! - Powers of two: `2^8`, `2^16`, `2^32`, `2^64`.
 //!
-//! Generally speaking, fast moduli pay a cost of 1-3 additional instructions per operation compared
-//! to power-of-two moduli. Multiplication in `prime` is significantly slower than in `fast`, and
-//! other operations are slightly slower.
+//! Generally speaking, "fast" moduli pay a cost of 1-3 additional instructions per operation
+//! compared to power-of-two moduli. Multiplication in `prime` is significantly slower than in
+//! `fast`, and other operations are slightly slower.
 //!
 //! [thue-morse]: https://en.wikipedia.org/wiki/Thue%E2%80%93Morse_sequence#Hash_collisions
 //! [montgomery]: https://en.wikipedia.org/wiki/Montgomery_modular_multiplication
@@ -37,13 +38,14 @@
 //!
 //! - `+`, `-` (both binary and unary), and `*` work straightforwardly.
 //! - [`inverse`](fast::Mod64::inverse) computes the multiplicative inverse if it exists, i.e. if
-//!   the argument `x` and the modulus `2^k - 1` are coprime.
+//!   the argument `x` and the modulus are coprime.
 //! - `x / y` computes the product of `x` and the multiplicative inverse of `y`. If `y` is not
 //!   invertible, this operation panics. Note that computing inverses is slow, so they should
 //!   ideally computed once and then reused.
 //! - `pow` computes exponents.
 //! - `<<` and `>>` correspond to multiplication and division by powers of two, respectively.
-//!   Arbitrarily large shift amounts are supported.
+//!   Arbitrarily large and negative shift amounts are supported. (Division is not supported for
+//!   `2^k` moduli.)
 //! - `==` performs modular comparison.
 //! - [`Display`](core::fmt::Display) and related traits print the remainder.
 
@@ -55,6 +57,7 @@ extern crate std;
 
 pub mod fast;
 mod macros;
+pub mod power;
 pub mod prime;
 
 // #[inline(never)]
@@ -63,8 +66,9 @@ pub mod prime;
 // }
 
 #[inline(never)]
-pub fn example(x: prime::Mod61, n: u64) -> prime::Mod61 {
-    x >> n
+pub fn example(x: power::Mod64, n: u64) -> power::Mod64 {
+    x.pow(n)
+    // x << n
     // if n < 61 { Some(x << n) } else { None }
     // x.is_invertible()
     // x << (n & 3)

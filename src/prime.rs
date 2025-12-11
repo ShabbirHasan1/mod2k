@@ -24,13 +24,12 @@ macro_rules! define_type {
             value: $native,
         }
 
-        crate::macros::define_type_basics!($ty as $native);
+        crate::macros::define_type_basics!($ty as $native, shr = true);
 
         impl $ty {
             const MODULUS: $native = (1 << $k) - 1;
             #[allow(unused, reason = "used by tests")]
             const CARMICHAEL: u64 = Self::MODULUS as u64 - 1;
-            const IS_PRIME: bool = true;
 
             /// Create a value corresponding to `x mod (2^k - 1)`.
             #[inline]
@@ -131,6 +130,8 @@ macro_rules! define_type {
             pub fn is_invertible(self) -> bool {
                 self.value != 0
             }
+
+            crate::macros::define_exgcd_inverse!(true);
 
             #[inline]
             fn shift_internal(self, n: u32, left: bool) -> Self {
@@ -307,7 +308,7 @@ macro_rules! define_type {
         mod $test_mod {
             use super::$ty;
 
-            crate::macros::test_ty!($ty as $native, $signed);
+            crate::macros::test_ty!($ty as $native, $signed, shr = true);
 
             #[test]
             fn raw() {
