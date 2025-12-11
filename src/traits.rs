@@ -12,6 +12,7 @@ pub trait Mod: Sized {
     const ONE: Self;
 
     /// Create a value corresponding to `x mod m`.
+    #[must_use]
     fn new(x: Self::Native) -> Self;
 
     /// Create a value corresponding to `x`, assuming `x < m`.
@@ -23,9 +24,11 @@ pub trait Mod: Sized {
     /// # Safety
     ///
     /// This function is only valid to call if `x` is less than the modulus.
+    #[must_use]
     unsafe fn from_remainder_unchecked(x: Self::Native) -> Self;
 
     /// Get the normalized residue `x mod m`.
+    #[must_use]
     fn remainder(self) -> Self::Native;
 
     /// Get the internal optimized representation of the number.
@@ -33,6 +36,7 @@ pub trait Mod: Sized {
     /// This returns some value equivalent to `x` modulo `m`, but not necessarily `x mod m` itself.
     /// This is more efficient than [`remainder`](Self::remainder) for prime moduli. Passing this
     /// value back to [`new`](Self::new) is guaranteed to produce the same value as `self`.
+    #[must_use]
     fn to_raw(self) -> Self::Native;
 
     /// Compare for equality with a constant.
@@ -42,11 +46,13 @@ pub trait Mod: Sized {
     ///
     /// `C` is typed `u64` instead of [`Native`](Self::Native) due to Rust having issues with
     /// associated types in `const`.
+    #[must_use]
     fn is<const C: u64>(self) -> bool;
 
     /// Compare for equality with zero.
     ///
     /// This is equivalent to `is::<0>()`.
+    #[must_use]
     fn is_zero(&self) -> bool;
 
     /// Compute `x^n mod m`.
@@ -55,12 +61,14 @@ pub trait Mod: Sized {
     /// Carmichael function][1] to reduce exponents. It works in `O(log n)`.
     ///
     /// [1]: https://en.wikipedia.org/wiki/Carmichael_function
+    #[must_use]
     fn pow(self, n: u64) -> Self;
 
     /// Check if the value is invertible, i.e. if `x` is coprime with `m`.
     ///
     /// For fast and prime moduli, the current implementation uses the binary Euclidean algorithm,
     /// which works in `O(k)`. For power-of-two moduli, it checks `x` if odd.
+    #[must_use]
     fn is_invertible(&self) -> bool;
 
     /// Compute multiplicative inverse.
@@ -72,5 +80,6 @@ pub trait Mod: Sized {
     /// lifting][hensel], which works in `O(log k)`.
     ///
     /// [hensel]: https://en.wikipedia.org/wiki/Modular_multiplicative_inverse#Inverses_modulo_prime_powers_(including_powers_of_2)
+    #[must_use]
     fn inverse(self) -> Option<Self>;
 }
