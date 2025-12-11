@@ -16,8 +16,8 @@
 //!    do not support division by two.
 //!
 //! The general-purpose [num-modular] crate implements (1). This crate provides highly optimized
-//! implementations of (2), (3), and (4) with uniform interface to allow you to play with different
-//! options and choose the best one. The supported moduli are:
+//! implementations of (2), (3), and (4) with a uniform interface, enabling you to try different
+//! options and find the best one. The supported moduli are:
 //!
 //! - Primes: `2^7 - 1`, `2^13 - 1`, `2^31 - 1`, `2^61 - 1`.
 //! - "Fast": `2^8 - 1`, `2^16 - 1`, `2^32 - 1`, `2^64 - 1`.

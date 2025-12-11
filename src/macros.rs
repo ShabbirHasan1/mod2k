@@ -132,7 +132,7 @@ macro_rules! define_exgcd_inverse {
         ///
         /// Returns `None` if `x` is not coprime with `2^k - 1`.
         ///
-        /// The current implementation uses the iterative binary extended Euclidian algorithm and
+        /// The current implementation uses the iterative binary extended Euclidean algorithm and
         /// works in `O(k)`.
         pub fn inverse(self) -> Option<Self> {
             if self.value == 0 {
@@ -142,7 +142,7 @@ macro_rules! define_exgcd_inverse {
             let mut x = self.value;
             let mut y = Self::MODULUS;
 
-            // Binary extended Euclidian algorithm a la https://eprint.iacr.org/2020/972.pdf
+            // Binary extended Euclidean algorithm a la https://eprint.iacr.org/2020/972.pdf
             // (Optimized Binary GCD for Modular Inversion, Thomas Pornin).
             //
             // At each step, `a_i x_i + b_i y_i = d`, where `d = (x, y)`.
@@ -160,7 +160,7 @@ macro_rules! define_exgcd_inverse {
             //
             // and iteratively multiply the covector `(s t) = (1 0)` by matrices `A_i`.
             //
-            // For binary Euclidian algorithm, `A_i` can contain division by powers of two, so both
+            // For binary Euclidean algorithm, `A_i` can contain division by powers of two, so both
             // `A_i` and `(s t)` are computed modulo `m`, since we're only interested in `a mod m`
             // anyway and dividing by two `mod m` is cheap.
 
@@ -528,7 +528,7 @@ macro_rules! test_ty {
         }
 
         fn has_common_divisor(mut x: $native, mut y: $native) -> bool {
-            // Textbook Euclidian algorithm.
+            // Textbook Euclidean algorithm.
             while x != 0 && y != 0 {
                 x %= y;
                 core::mem::swap(&mut x, &mut y);

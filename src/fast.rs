@@ -123,9 +123,9 @@ macro_rules! define_type {
 
             /// Check if the value is invertible, i.e. if `x` is coprime with `2^k - 1`.
             ///
-            /// The current implementation uses the binary Euclidian algorithm and works in `O(k)`.
+            /// The current implementation uses the binary Euclidean algorithm and works in `O(k)`.
             pub fn is_invertible(self) -> bool {
-                // LLVM optimizes out the "extended" part of the Euclidian algorithm.
+                // LLVM optimizes out the "extended" part of the Euclidean algorithm.
                 self.inverse().is_some()
             }
 
