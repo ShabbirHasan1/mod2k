@@ -127,6 +127,7 @@ macro_rules! define_type {
             ///
             /// This method is provided for compatibility with fast moduli, for which the check is
             /// more complicated.
+            #[inline]
             pub fn is_invertible(self) -> bool {
                 self.value != 0
             }
