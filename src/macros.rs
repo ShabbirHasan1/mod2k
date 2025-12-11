@@ -318,7 +318,7 @@ pub(crate) use define_type_basics;
 
 #[cfg(test)]
 macro_rules! test_ty {
-    ($ty:ident as $native:ident, $signed: ident) => {
+    ($ty:ident as $native:ident, $signed:ident) => {
         fn numbers() -> impl Iterator<Item = $ty> {
             // Range limited so that the product of two numbers fits in $signed for testing.
             (-11..=11).map(|x| $ty::new(x as $native))
@@ -536,9 +536,13 @@ macro_rules! test_ty {
         #[test]
         #[should_panic]
         fn division_by_non_invertible() {
-            if $ty::MODULUS % 5 == 0 {
-                let _ = $ty::new(5) / $ty::new(5);
-            }
+            assert!($ty::MODULUS != 0 && $ty::MODULUS % 5 == 0);
+            let _ = $ty::new(5) / $ty::new(5);
+        }
+
+        #[test]
+        #[should_panic]
+        fn division_by_zero() {
             let _ = $ty::new(1) / $ty::new(0);
         }
 
