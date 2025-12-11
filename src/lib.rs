@@ -1,7 +1,7 @@
 //! Fast arithmetic modulo `2^k` and `2^k - 1`.
 //!
 //! Modular arithmetic is useful for fast hashing, verification of polynomial operations, and as
-//! a field balancing the cost of division with the cost of other operations. Different moduli make
+//! a ring balancing the cost of division with the cost of other operations. Different moduli make
 //! different quality vs performance tradeoffs:
 //!
 //! 1. Large prime moduli have the best quality, but operations are quite slow due to the complexity
