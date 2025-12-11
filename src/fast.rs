@@ -13,7 +13,7 @@ macro_rules! define_type {
         test in $test_mod:ident,
         carmichael = $carmichael:literal
     ) => {
-        // The `value` field stores some value equivelent to `x` modulo `2^k - 1`: specifically, `0`
+        // The `value` field stores some value equivalent to `x` modulo `2^k - 1`: specifically, `0`
         // can be represented as either `0` or `2^k - 1`.
         crate::macros::define_type_basics! {
             #[$meta]
