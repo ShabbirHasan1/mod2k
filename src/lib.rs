@@ -5,7 +5,7 @@
 //! different quality vs performance tradeoffs:
 //!
 //! 1. Large prime moduli have the best quality, but operations are quite slow due to the complexity
-//!    of reduction, even with [Montgomery multiplication][montgomery].
+//!    of reduction, even if tricks like [Montgomery multiplication][montgomery] are used.
 //! 2. Primes like `2^61 - 1` can be reduced significantly faster, but they are relatively rare, so
 //!    you can lose several bits of precision compared to the largest prime fitting in the data
 //!    type.
