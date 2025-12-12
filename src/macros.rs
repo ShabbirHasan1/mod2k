@@ -189,7 +189,8 @@ macro_rules! define_exgcd_inverse {
                 if $fast_shr {
                     s >>= k;
                 } else {
-                    // Will shift right once at the end.
+                    // Will shift right once at the end. Has suboptimal codegen due to [1].
+                    // [1]: https://github.com/llvm/llvm-project/issues/172097
                     total_k += k;
                     t <<= k;
                 }
