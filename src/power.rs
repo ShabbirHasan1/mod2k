@@ -78,7 +78,7 @@ macro_rules! define_type {
                     // `x` is invertible, so `x^lambda = 1 (mod 2^k)`.
                     n %= Self::CARMICHAEL;
                 }
-                self.pow_internal(n)
+                self.pow_internal(n, Self::ONE)
             }
 
             #[inline]

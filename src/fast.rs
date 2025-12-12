@@ -91,7 +91,7 @@ macro_rules! define_type {
                 } else {
                     (n - 1) % Self::CARMICHAEL + 1
                 };
-                self.pow_internal(new_n)
+                self.pow_internal(new_n, Self::ONE)
             }
 
             fn is_invertible(&self) -> bool {
@@ -99,7 +99,11 @@ macro_rules! define_type {
                 self.inverse().is_some()
             }
 
-            crate::macros::define_exgcd_inverse!(false);
+            crate::macros::define_exgcd_inverse!(
+                prime = false,
+                limited_value = true,
+                fast_shr = true
+            );
         }
 
         impl Add for $ty {

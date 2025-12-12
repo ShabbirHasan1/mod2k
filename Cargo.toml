@@ -1,6 +1,6 @@
 [package]
 name = "mod2k"
-description = "Fast arithmetic modulo `2^k` and `2^k - 1`."
+description = "Fast arithmetic modulo `2^k`, `2^k - 1`, and `2^k - d`."
 version = "0.1.0"
 license = "MIT"
 edition = "2024"

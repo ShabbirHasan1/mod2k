@@ -127,13 +127,22 @@ macro_rules! forward_shift_op {
 pub(crate) use forward_shift_op;
 
 macro_rules! define_exgcd_inverse {
-    ($is_prime:literal) => {
+    (
+        prime = $prime:literal,
+        limited_value = $limited_value:literal,
+        fast_shr = $fast_shr:literal
+    ) => {
         fn inverse(self) -> Option<Self> {
-            if self.value == 0 {
+            if self.is_zero() {
                 return None;
             }
 
-            let mut x = self.value;
+            // `$limited_value` indicates `value <= MODULUS`.
+            let mut x = if $limited_value {
+                self.value
+            } else {
+                self.remainder()
+            };
             let mut y = Self::MODULUS;
 
             // Binary extended Euclidean algorithm a la https://eprint.iacr.org/2020/972.pdf
@@ -160,6 +169,7 @@ macro_rules! define_exgcd_inverse {
 
             let mut s = Self::ONE;
             let mut t = Self::ZERO;
+            let mut total_k = 0;
 
             // At the start of each iteration, `x` is non-zero and `y` is odd.
             while x != 0 {
@@ -171,7 +181,13 @@ macro_rules! define_exgcd_inverse {
                 }
                 let k = x.trailing_zeros();
                 x >>= k;
-                s >>= k;
+                if $fast_shr {
+                    s >>= k;
+                } else {
+                    // Will shift right once at the end.
+                    total_k += k;
+                    t <<= k;
+                }
                 if x < y {
                     core::mem::swap(&mut x, &mut y);
                     core::mem::swap(&mut s, &mut t);
@@ -180,7 +196,13 @@ macro_rules! define_exgcd_inverse {
                 s -= t;
             }
 
-            let is_invertible = $is_prime || y == 1;
+            if !$fast_shr {
+                t >>= total_k;
+            }
+
+            // We have previously asserted `!is_zero`, and all non-zero values are invertible modulo
+            // prime.
+            let is_invertible = $prime || y == 1;
             is_invertible.then_some(t)
         }
     };
@@ -201,8 +223,8 @@ macro_rules! define_type_basics {
         }
 
         impl $ty {
-            fn pow_internal(self, mut n: u64) -> Self {
-                let mut res = Self::ONE;
+            fn pow_internal(self, mut n: u64, coproduct: Self) -> Self {
+                let mut res = coproduct;
                 let mut tmp = self;
                 while n > 0 {
                     // This line compiles to cmov. It's important to keep this branchless, because
@@ -536,6 +558,12 @@ macro_rules! test_ty {
 
         #[test]
         fn inverse() {
+            assert!(!$ty::ZERO.is_invertible());
+            assert!($ty::ZERO.inverse().is_none());
+
+            assert!(!$ty::new($ty::MODULUS).is_invertible());
+            assert!($ty::new($ty::MODULUS).inverse().is_none());
+
             for x in numbers() {
                 if let Some(y) = x.inverse() {
                     assert!(x.is_invertible());
@@ -577,7 +605,7 @@ macro_rules! test_ty {
                 let mut expected = $ty::ONE;
                 for n in 0..10 {
                     assert_eq!(x.pow(n), expected);
-                    assert_eq!(x.pow($ty::CARMICHAEL + n), x.pow_internal($ty::CARMICHAEL + n));
+                    assert_eq!(x.pow($ty::CARMICHAEL + n), x.pow_internal($ty::CARMICHAEL + n, $ty::ONE));
                     expected *= x;
                 }
             }
@@ -587,7 +615,7 @@ macro_rules! test_ty {
         fn carmichael() {
             for x in numbers() {
                 if x.is_invertible() {
-                    assert!(x.pow_internal($ty::CARMICHAEL).is::<1>());
+                    assert!(x.pow_internal($ty::CARMICHAEL, $ty::ONE).is::<1>());
                 }
             }
         }

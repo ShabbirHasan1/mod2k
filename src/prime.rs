@@ -157,7 +157,7 @@ macro_rules! define_type {
                     // SAFETY: proven above.
                     core::hint::assert_unchecked(n != 0);
                 }
-                self.pow_internal(n)
+                self.pow_internal(n, Self::ONE)
             }
 
             #[inline]
@@ -165,7 +165,11 @@ macro_rules! define_type {
                 self.value != 0
             }
 
-            crate::macros::define_exgcd_inverse!(true);
+            crate::macros::define_exgcd_inverse!(
+                prime = true,
+                limited_value = true,
+                fast_shr = true
+            );
         }
 
         impl Add for $ty {

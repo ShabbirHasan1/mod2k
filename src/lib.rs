@@ -1,4 +1,4 @@
-//! Fast arithmetic modulo `2^k` and `2^k - 1`.
+//! Fast arithmetic modulo `2^k`, `2^k - 1`, and `2^k - d`.
 //!
 //! Modular arithmetic is useful for fast hashing, verification of polynomial operations, and as
 //! a ring balancing the cost of division with the cost of other operations. Different moduli make
@@ -15,17 +15,18 @@
 //! 4. Power-of-two moduli are the fastest, but [have seed-independent collisions][thue-morse] and
 //!    do not support division by two.
 //!
-//! The general-purpose [num-modular] crate implements (1). This crate provides highly optimized
-//! implementations of (2), (3), and (4) with a uniform interface, enabling you to try different
-//! options and find the best one. The supported moduli are:
+//! This crate provides a uniform interface to highly optimized implementations of all these moduli,
+//! enabling you to easily try different options and find the best one. The supported moduli are:
 //!
+//! - ["Big" primes](big_prime): `2^8 - 5`, `2^16 - 15`, `2^32 - 5`, `2^64 - 59`.
 //! - [Primes](prime): `2^7 - 1`, `2^13 - 1`, `2^31 - 1`, `2^61 - 1`.
 //! - ["Fast"](fast): `2^8 - 1`, `2^16 - 1`, `2^32 - 1`, `2^64 - 1`.
 //! - [Powers of two](power): `2^8`, `2^16`, `2^32`, `2^64`.
 //!
 //! Generally speaking, "fast" moduli pay a cost of 1-3 additional instructions per operation
 //! compared to power-of-two moduli. Multiplication in `prime` is significantly slower than in
-//! `fast`, and other operations are slightly slower.
+//! `fast`, and other operations are slightly slower. `big_prime` is the slowest of all, having slow
+//! multiplication and shifts.
 //!
 //! [thue-morse]: https://en.wikipedia.org/wiki/Thue%E2%80%93Morse_sequence#Hash_collisions
 //! [montgomery]: https://en.wikipedia.org/wiki/Montgomery_modular_multiplication
@@ -63,12 +64,14 @@
 #[cfg(test)]
 extern crate std;
 
+pub mod big_prime;
 pub mod fast;
 mod macros;
 pub mod power;
 pub mod prime;
 mod traits;
 
+pub use big_prime::*;
 pub use fast::*;
 pub use power::*;
 pub use prime::*;
