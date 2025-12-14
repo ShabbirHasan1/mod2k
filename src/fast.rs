@@ -4,6 +4,7 @@
 //! comparison with a constant: prefer `x.is::<C>()` over `x == FastK::new(C)`.
 
 use super::Mod;
+use core::hint::select_unpredictable;
 use core::ops::{Add, Mul, Neg, Shl, Shr, Sub};
 
 macro_rules! define_type {
@@ -45,11 +46,7 @@ macro_rules! define_type {
 
             #[inline]
             fn remainder(self) -> $native {
-                if self.value == $native::MAX {
-                    0
-                } else {
-                    self.value
-                }
+                select_unpredictable(self.value == $native::MAX, 0, self.value)
             }
 
             #[inline]

@@ -7,6 +7,7 @@
 //! [`assert_unchecked`](core::hint::assert_unchecked).
 
 use super::Mod;
+use core::hint::select_unpredictable;
 use core::ops::{Add, Mul, Neg, Shl, Shr, Sub};
 
 macro_rules! define_type {
@@ -37,7 +38,7 @@ macro_rules! define_type {
                 let (diff, borrow) = x.overflowing_sub(Self::MODULUS);
                 // SAFETY: If `x < m`, this chooses `x`. If `x >= m`, this choses
                 // `x - m <= (2 * m - 1) - m < m`.
-                unsafe { Self::new_unchecked(if borrow { x } else { diff }) }
+                unsafe { Self::new_unchecked(select_unpredictable(borrow, x, diff)) }
             }
 
             #[inline]
@@ -188,10 +189,8 @@ macro_rules! define_type {
 
             #[inline]
             fn sub(self, other: Self) -> Self {
-                let (mut diff, borrow) = self.value.overflowing_sub(other.value);
-                if borrow {
-                    diff = diff.wrapping_add(Self::MODULUS);
-                }
+                let (diff, borrow) = self.value.overflowing_sub(other.value);
+                let diff = select_unpredictable(borrow, diff.wrapping_add(Self::MODULUS), diff);
                 // SAFETY: `-m < x - y < m`, so after correcting negative numbers `diff < m`.
                 unsafe { Self::new_unchecked(diff) }
             }
@@ -218,12 +217,15 @@ macro_rules! define_type {
 
             #[inline]
             fn neg(self) -> Self {
-                if self.value == 0 {
-                    Self::ZERO
-                } else {
-                    // SAFETY: `value > 0` implies `MODULUS - value < MODULUS`.
-                    unsafe { Self::new_unchecked(Self::MODULUS - self.value) }
-                }
+                select_unpredictable(
+                    self.value == 0,
+                    Self::ZERO,
+                    // Deliberately avoid `Self::new_unchecked` here, since `select_unpredictable`
+                    // doesn't affect control flow and this is computed even for `x = 0`.
+                    Self {
+                        value: Self::MODULUS - self.value,
+                    },
+                )
             }
         }
 

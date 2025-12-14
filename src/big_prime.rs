@@ -7,6 +7,7 @@
 //! [`assert_unchecked`](core::hint::assert_unchecked).
 
 use super::Mod;
+use core::hint::select_unpredictable;
 use core::ops::{Add, Mul, Neg, Shl, Shr, Sub};
 
 macro_rules! define_type {
@@ -84,7 +85,7 @@ macro_rules! define_type {
                 // Bad lowering on aarch64 because codegenprepare doesn't infer
                 // @llvm.usub.with.overflow.
                 let (diff, borrow) = self.value.overflowing_sub(Self::MODULUS);
-                if borrow { self.value } else { diff }
+                select_unpredictable(borrow, self.value, diff)
             }
 
             #[inline]
@@ -139,8 +140,8 @@ macro_rules! define_type {
             #[inline]
             fn add(self, other: Self) -> Self {
                 let (sum, carry) = self.value.overflowing_add(other.value);
-                let (sum, carry) = sum.overflowing_add(if carry { $d } else { 0 });
-                Self::new(if carry { sum.wrapping_add($d) } else { sum })
+                let (sum, carry) = sum.overflowing_add(select_unpredictable(carry, $d, 0));
+                Self::new(select_unpredictable(carry, sum.wrapping_add($d), sum))
             }
         }
 
@@ -152,11 +153,11 @@ macro_rules! define_type {
                 // Bad lowering on aarch64 due to the issue in `remainder` and [1].
                 // [1]: https://github.com/llvm/llvm-project/issues/171884
                 let (diff, borrow) = self.value.overflowing_sub(other.remainder());
-                Self::new(if borrow {
-                    diff.wrapping_add(Self::MODULUS)
-                } else {
-                    diff
-                })
+                Self::new(select_unpredictable(
+                    borrow,
+                    diff.wrapping_add(Self::MODULUS),
+                    diff,
+                ))
             }
         }
 
@@ -188,7 +189,7 @@ macro_rules! define_type {
 
                 // Reduce again, this time knowing that `high < d`.
                 let (low, carry) = low.overflowing_add(high * $d);
-                Self::new(if carry { low.wrapping_add($d) } else { low })
+                Self::new(select_unpredictable(carry, low.wrapping_add($d), low))
             }
         }
 
@@ -198,11 +199,11 @@ macro_rules! define_type {
             #[inline]
             fn neg(self) -> Self {
                 Self::new(
-                    if self.value > Self::MODULUS {
-                        Self::MODULUS.wrapping_mul(2)
-                    } else {
-                        Self::MODULUS
-                    }
+                    select_unpredictable(
+                        self.value > Self::MODULUS,
+                        Self::MODULUS.wrapping_mul(2),
+                        Self::MODULUS,
+                    )
                     .wrapping_sub(self.value),
                 )
             }
