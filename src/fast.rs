@@ -13,6 +13,7 @@ macro_rules! define_type {
         $ty:ident as $native:ident, $signed:ident,
         test in $test_mod:ident,
         carmichael = $carmichael:literal,
+        factorization = $factorization:expr,
         inv_strategy = $($inv_strategy:tt)*
     ) => {
         // The `value` field stores some value equivalent to `x` modulo `2^k - 1`: specifically, `0`
@@ -94,8 +95,7 @@ macro_rules! define_type {
             }
 
             fn is_invertible(&self) -> bool {
-                // LLVM optimizes out the "extended" part of the Euclidean algorithm.
-                self.inverse().is_some()
+                $factorization.iter().all(|p| self.value % *p != 0)
             }
 
             crate::macros::define_exgcd_inverse!(prime = false, strategy = $($inv_strategy)*);
@@ -209,7 +209,11 @@ macro_rules! define_type {
 
 define_type! {
     /// Arithmetic modulo `2^8 - 1 = 3 * 5 * 17`.
-    Fast8 as u8, i8, test in test8, carmichael = 16, inv_strategy = short with 4539345845589311231
+    Fast8 as u8, i8,
+    test in test8,
+    carmichael = 16,
+    factorization = [3, 5, 17],
+    inv_strategy = short with 4539345845589311231
 }
 
 define_type! {
@@ -217,6 +221,7 @@ define_type! {
     Fast16 as u16, i16,
     test in test16,
     carmichael = 256,
+    factorization = [3, 5, 17, 257],
     inv_strategy = short with 4611404539155644415
 }
 
@@ -225,6 +230,7 @@ define_type! {
     Fast32 as u32, i32,
     test in test32,
     carmichael = 65536,
+    factorization = [3, 5, 17, 257, 65537],
     inv_strategy = short with 4611686014132420607
 }
 
@@ -233,6 +239,7 @@ define_type! {
     Fast64 as u64, i64,
     test in test64,
     carmichael = 17153064960,
+    factorization = [3, 5, 17, 257, 641, 65537, 6700417],
     inv_strategy = long with 9223372036854775807
 }
 
