@@ -18,7 +18,7 @@ macro_rules! define_type {
         d = $d:literal,
         d_order = $d_order:literal,
         d_inv = $d_inv:literal,
-        inv_strategy = $($inv_strategy:tt)*
+        inv_strategy = {$($inv_strategy:tt)*}
     ) => {
         // The `value` field stores some value equivalent to `x` modulo `2^k - d`.
         crate::macros::define_type_basics! {
@@ -139,7 +139,7 @@ macro_rules! define_type {
                 !self.is_zero()
             }
 
-            crate::exgcd::define_exgcd_inverse!(prime = true, strategy = $($inv_strategy)*);
+            crate::exgcd::define_exgcd_inverse!(prime = true, $($inv_strategy)*);
         }
 
         impl Add for $ty {
@@ -308,7 +308,7 @@ define_type! {
     d = 5,
     d_order = 25,
     d_inv = 201,
-    inv_strategy = short with 2939720171109091891
+    inv_strategy = {long = false, modulus_inv = 2939720171109091891}
 }
 
 define_type! {
@@ -318,7 +318,7 @@ define_type! {
     d = 15,
     d_order = 585,
     d_inv = 61153,
-    inv_strategy = short with 6378838547611259153
+    inv_strategy = {long = false, modulus_inv = 6378838547611259153}
 }
 
 define_type! {
@@ -328,7 +328,7 @@ define_type! {
     d = 5,
     d_order = 2147483645,
     d_inv = 3435973833,
-    inv_strategy = short with 8116567392260404019
+    inv_strategy = {long = false, modulus_inv = 8116567392260404019}
 }
 
 define_type! {
@@ -338,7 +338,7 @@ define_type! {
     d = 59,
     d_order = 4611686018427387889,
     d_inv = 14694863923124558020,
-    inv_strategy = long with 3751880150584993549
+    inv_strategy = {long = true, modulus_inv = 3751880150584993549}
 }
 
 #[cfg(doctest)]

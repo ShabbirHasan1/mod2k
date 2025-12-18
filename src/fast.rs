@@ -14,7 +14,7 @@ macro_rules! define_type {
         test in $test_mod:ident,
         carmichael = $carmichael:literal,
         factorization = $factorization:expr,
-        inv_strategy = $($inv_strategy:tt)*
+        inv_strategy = {$($inv_strategy:tt)*}
     ) => {
         // The `value` field stores some value equivalent to `x` modulo `2^k - 1`: specifically, `0`
         // can be represented as either `0` or `2^k - 1`.
@@ -98,7 +98,7 @@ macro_rules! define_type {
                 $factorization.iter().all(|p| self.value % *p != 0)
             }
 
-            crate::exgcd::define_exgcd_inverse!(prime = false, strategy = $($inv_strategy)*);
+            crate::exgcd::define_exgcd_inverse!(prime = false, $($inv_strategy)*);
         }
 
         impl Add for $ty {
@@ -213,7 +213,7 @@ define_type! {
     test in test8,
     carmichael = 16,
     factorization = [3, 5, 17],
-    inv_strategy = short with 9151031864016699135
+    inv_strategy = {long = false, modulus_inv = 9151031864016699135}
 }
 
 define_type! {
@@ -222,7 +222,7 @@ define_type! {
     test in test16,
     carmichael = 256,
     factorization = [3, 5, 17, 257],
-    inv_strategy = short with 9223090557583032319
+    inv_strategy = {long = false, modulus_inv = 9223090557583032319}
 }
 
 define_type! {
@@ -231,7 +231,7 @@ define_type! {
     test in test32,
     carmichael = 65536,
     factorization = [3, 5, 17, 257, 65537],
-    inv_strategy = short with 9223372032559808511
+    inv_strategy = {long = false, modulus_inv = 9223372032559808511}
 }
 
 define_type! {
@@ -240,7 +240,7 @@ define_type! {
     test in test64,
     carmichael = 17153064960,
     factorization = [3, 5, 17, 257, 641, 65537, 6700417],
-    inv_strategy = builtin
+    inv_strategy = {/*long = true, modulus_inv = 9223372036854775807*/ builtin}
 }
 
 #[cfg(doctest)]
