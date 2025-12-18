@@ -65,6 +65,7 @@
 extern crate std;
 
 pub mod big_prime;
+mod exgcd;
 pub mod fast;
 mod macros;
 pub mod power;

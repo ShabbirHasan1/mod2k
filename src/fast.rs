@@ -98,7 +98,7 @@ macro_rules! define_type {
                 $factorization.iter().all(|p| self.value % *p != 0)
             }
 
-            crate::macros::define_exgcd_inverse!(prime = false, strategy = $($inv_strategy)*);
+            crate::exgcd::define_exgcd_inverse!(prime = false, strategy = $($inv_strategy)*);
         }
 
         impl Add for $ty {
@@ -213,7 +213,7 @@ define_type! {
     test in test8,
     carmichael = 16,
     factorization = [3, 5, 17],
-    inv_strategy = short with 4539345845589311231
+    inv_strategy = short with 9151031864016699135
 }
 
 define_type! {
@@ -222,7 +222,7 @@ define_type! {
     test in test16,
     carmichael = 256,
     factorization = [3, 5, 17, 257],
-    inv_strategy = short with 4611404539155644415
+    inv_strategy = short with 9223090557583032319
 }
 
 define_type! {
@@ -231,7 +231,7 @@ define_type! {
     test in test32,
     carmichael = 65536,
     factorization = [3, 5, 17, 257, 65537],
-    inv_strategy = short with 4611686014132420607
+    inv_strategy = short with 9223372032559808511
 }
 
 define_type! {

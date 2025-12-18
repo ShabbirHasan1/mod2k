@@ -139,7 +139,7 @@ macro_rules! define_type {
                 !self.is_zero()
             }
 
-            crate::macros::define_exgcd_inverse!(prime = true, strategy = $($inv_strategy)*);
+            crate::exgcd::define_exgcd_inverse!(prime = true, strategy = $($inv_strategy)*);
         }
 
         impl Add for $ty {
@@ -318,7 +318,7 @@ define_type! {
     d = 15,
     d_order = 585,
     d_inv = 61153,
-    inv_strategy = short with 1767152529183871249
+    inv_strategy = short with 6378838547611259153
 }
 
 define_type! {
@@ -328,7 +328,7 @@ define_type! {
     d = 5,
     d_order = 2147483645,
     d_inv = 3435973833,
-    inv_strategy = short with 3504881373833016115
+    inv_strategy = short with 8116567392260404019
 }
 
 define_type! {
