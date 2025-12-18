@@ -350,7 +350,7 @@ define_type! {
     test in test61,
     k = 61,
     modulus_inv = 16140901064495857663,
-    inv_strategy = {long = true /*builtin*/}
+    inv_strategy = {long = true}
 }
 
 #[cfg(doctest)]
