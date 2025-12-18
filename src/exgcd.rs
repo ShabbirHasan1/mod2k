@@ -71,41 +71,19 @@ macro_rules! define_exgcd_inverse {
         }
     };
 
-    // `$modulus_inv = MODULUS^-1 mod 2^63`.
-    (prime = $prime:literal, long = $long:literal, modulus_inv = $modulus_inv:literal) => {
+    (prime = $prime:literal, long = $long:literal) => {
         fn inverse(self) -> Option<Self> {
             if self.is_zero() {
                 return None;
             }
 
             let fp_to_modular = |x: u64| -> Self {
-                // Get 1 out of the way quickly, since it makes handling of signed numbers difficult
-                // and REDC doesn't handle it correctly.
                 if x == 1 << 63 {
-                    return Self::ONE;
-                }
-                let x = x as i64;
-                // Compute `x / 2^63 mod MODULUS` with REDC.
-                //
-                // For non-negative `x`, take
-                //     x' = x - ((x * MODULUS^-1) mod 2^63) * MODULUS
-                // Then `x' = x (mod MODULUS)` and `x' = 0 (mod 2^63)`, so
-                //     x / 2^63 = x' >> 63 (mod MODULUS)
-                // Since the bottom 63 bits of `x` and the subtrahend are equal, and the bits above
-                // that position in `x` are zero (unless `x = 2^63`, which we handle explicitly),
-                // that's equal to
-                //     -(((x * MODULUS^-1) mod 2^63) * MODULUS) >> 63
-                // which can be computed more efficiently as
-                //     -(((x * (MODULUS^-1 << 1)) mod 2^64) * MODULUS) >> 64
-                // This is a value between `0` and `-(MODULUS - 1)`, so this can be
-                // straightforwardly translated to a remainder.
-                let factor = x.unsigned_abs().wrapping_mul($modulus_inv << 1);
-                let neg_rem = factor.carrying_mul(Self::MODULUS as u64, 0).1 as Self::Native;
-                Self::new(if x >= 0 {
-                    Self::MODULUS - neg_rem
+                    Self::ONE
                 } else {
-                    neg_rem
-                })
+                    let xm = Self::redc64((x as i64).unsigned_abs() << 1);
+                    if x as i64 >= 0 { xm } else { -xm }
+                }
             };
 
             let mut a = self.value as u64;

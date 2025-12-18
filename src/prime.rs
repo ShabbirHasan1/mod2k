@@ -16,6 +16,7 @@ macro_rules! define_type {
         $ty:ident as $native:ident, $signed:ident,
         test in $test_mod:ident,
         k = $k:literal,
+        modulus_inv = $modulus_inv:literal,
         inv_strategy = {$($inv_strategy:tt)*}
     ) => {
         // The `value` field stores the remainder.
@@ -89,6 +90,23 @@ macro_rules! define_type {
                 // SAFETY: The rotation fits in `k` bits by definition, and it can't be all ones
                 // because the input can't be all ones.
                 unsafe { Self::new_unchecked(x) }
+            }
+
+            // Calculate `x / 2^64 mod MODULUS`.
+            fn redc64(x: u64) -> Self {
+                // For non-negative `x`, take
+                //     x' = x - ((x * MODULUS^-1) mod 2^64) * MODULUS
+                // Then `x' = x (mod MODULUS)` and `x' = 0 (mod 2^64)`, so
+                //     x / 2^64 = x' >> 64 (mod MODULUS)
+                // Since `x` and the bottom 64 bits of the subtrahend are equal,
+                //     x' >> 64 = -(((x * MODULUS^-1) mod 2^64) * MODULUS) >> 64
+                // This is a value between `0` and `-(MODULUS - 1)`, so it can be straightforwardly
+                // translated to a remainder.
+                -Self::new(
+                    x.wrapping_mul($modulus_inv)
+                        .carrying_mul(Self::MODULUS as u64, 0)
+                        .1 as $native,
+                )
             }
         }
 
@@ -301,22 +319,38 @@ macro_rules! define_type {
 
 define_type! {
     /// Arithmetic modulo `2^7 - 1 = 127`.
-    Prime7 as u8, i8, test in test7, k = 7, inv_strategy = {long = false, modulus_inv = 9150747060186627967}
+    Prime7 as u8, i8,
+    test in test7,
+    k = 7,
+    modulus_inv = 9150747060186627967,
+    inv_strategy = {long = false}
 }
 
 define_type! {
     /// Arithmetic modulo `2^13 - 1 = 8191`.
-    Prime13 as u16, i16, test in test13, k = 13, inv_strategy = {long = false, modulus_inv = 9218867887404474367}
+    Prime13 as u16, i16,
+    test in test13,
+    k = 13,
+    modulus_inv = 18442239924259250175,
+    inv_strategy = {long = false}
 }
 
 define_type! {
     /// Arithmetic modulo `2^31 - 1 = 2147483647`.
-    Prime31 as u32, i32, test in test31, k = 31, inv_strategy = {long = false, modulus_inv = 4611686016279904255}
+    Prime31 as u32, i32,
+    test in test31,
+    k = 31,
+    modulus_inv = 13835058053134680063,
+    inv_strategy = {long = false}
 }
 
 define_type! {
     /// Arithmetic modulo `2^61 - 1 = 2305843009213693951`.
-    Prime61 as u64, i64, test in test61, k = 61, inv_strategy = {long = true, modulus_inv = 6917529027641081855 /*builtin*/}
+    Prime61 as u64, i64,
+    test in test61,
+    k = 61,
+    modulus_inv = 16140901064495857663,
+    inv_strategy = {long = true /*builtin*/}
 }
 
 #[cfg(doctest)]

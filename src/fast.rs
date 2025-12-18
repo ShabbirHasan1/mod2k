@@ -26,6 +26,12 @@ macro_rules! define_type {
 
         impl $ty {
             const CARMICHAEL: u64 = $carmichael;
+
+            // Calculate `x / 2^64 mod MODULUS`.
+            #[allow(unused, reason = "unused for Fast64 only")]
+            fn redc64(x: u64) -> Self {
+                Self::new((x % (Self::MODULUS as u64)) as $native)
+            }
         }
 
         impl crate::traits::sealed::Sealed for $ty {}
@@ -213,7 +219,7 @@ define_type! {
     test in test8,
     carmichael = 16,
     factorization = [3, 5, 17],
-    inv_strategy = {long = false, modulus_inv = 9151031864016699135}
+    inv_strategy = {long = false}
 }
 
 define_type! {
@@ -222,7 +228,7 @@ define_type! {
     test in test16,
     carmichael = 256,
     factorization = [3, 5, 17, 257],
-    inv_strategy = {long = false, modulus_inv = 9223090557583032319}
+    inv_strategy = {long = false}
 }
 
 define_type! {
@@ -231,7 +237,7 @@ define_type! {
     test in test32,
     carmichael = 65536,
     factorization = [3, 5, 17, 257, 65537],
-    inv_strategy = {long = false, modulus_inv = 9223372032559808511}
+    inv_strategy = {long = false}
 }
 
 define_type! {
@@ -240,7 +246,7 @@ define_type! {
     test in test64,
     carmichael = 17153064960,
     factorization = [3, 5, 17, 257, 641, 65537, 6700417],
-    inv_strategy = {/*long = true, modulus_inv = 9223372036854775807*/ builtin}
+    inv_strategy = {/*long = true*/ builtin}
 }
 
 #[cfg(doctest)]

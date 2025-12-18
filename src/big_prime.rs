@@ -18,6 +18,7 @@ macro_rules! define_type {
         d = $d:literal,
         d_order = $d_order:literal,
         d_inv = $d_inv:literal,
+        modulus_inv = $modulus_inv:literal,
         inv_strategy = {$($inv_strategy:tt)*}
     ) => {
         // The `value` field stores some value equivalent to `x` modulo `2^k - d`.
@@ -72,6 +73,15 @@ macro_rules! define_type {
                 };
 
                 self * factor
+            }
+
+            // Calculate `x / 2^64 mod MODULUS`. Copied from `prime.rs`.
+            fn redc64(x: u64) -> Self {
+                -Self::new(
+                    x.wrapping_mul($modulus_inv)
+                        .carrying_mul(Self::MODULUS as u64, 0)
+                        .1 as $native,
+                )
             }
         }
 
@@ -308,7 +318,8 @@ define_type! {
     d = 5,
     d_order = 25,
     d_inv = 201,
-    inv_strategy = {long = false, modulus_inv = 2939720171109091891}
+    modulus_inv = 2939720171109091891,
+    inv_strategy = {long = false}
 }
 
 define_type! {
@@ -318,7 +329,8 @@ define_type! {
     d = 15,
     d_order = 585,
     d_inv = 61153,
-    inv_strategy = {long = false, modulus_inv = 6378838547611259153}
+    modulus_inv = 6378838547611259153,
+    inv_strategy = {long = false}
 }
 
 define_type! {
@@ -328,7 +340,8 @@ define_type! {
     d = 5,
     d_order = 2147483645,
     d_inv = 3435973833,
-    inv_strategy = {long = false, modulus_inv = 8116567392260404019}
+    modulus_inv = 8116567392260404019,
+    inv_strategy = {long = false}
 }
 
 define_type! {
@@ -338,7 +351,8 @@ define_type! {
     d = 59,
     d_order = 4611686018427387889,
     d_inv = 14694863923124558020,
-    inv_strategy = {long = true, modulus_inv = 3751880150584993549}
+    modulus_inv = 3751880150584993549,
+    inv_strategy = {long = true}
 }
 
 #[cfg(doctest)]
