@@ -1,13 +1,11 @@
 //! Arithmetic modulo `2^8`, `2^16`, `2^32`, and `2^64`.
 //!
-//! Most combinations of operations are compiled as efficiently as possible. Note that these types
-//! behave more like modular arithmetic than `uK`:
+//! This is a wrapper over `uK` with behavior slightly adjusted for consistency with other moduli:
 //!
 //! - Left shifts are unbounded.
-//! - Right shifts are not implemented because `2` is not invertible, and left shifts by negative
-//!   amounts panic.
-//! - Arithmetic doesn't panic on overflow in debug.
-//! - Negation is implemented with wrapping semantics.
+//! - Left shifts by negative amounts panic and right shifts are not implemented, because `2` is not
+//!   invertible modulo `2^k`.
+//! - Arithmetic always wraps on overflow without causing a panic.
 
 use super::Mod;
 use core::ops::{Add, Mul, Neg, Shl, Sub};

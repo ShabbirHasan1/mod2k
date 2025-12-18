@@ -32,7 +32,7 @@ pub trait Mod: Sized + sealed::Sealed {
     ///
     /// # Safety
     ///
-    /// This function is guaranteed to be safe to call under if either of the two conditions holds:
+    /// This function is safe to call if either of the two conditions holds:
     /// - `x` is less than the modulus, or
     /// - `x` was produced by [`to_raw`](Self::to_raw) on the same type.
     #[must_use]
@@ -78,20 +78,22 @@ pub trait Mod: Sized + sealed::Sealed {
 
     /// Check if the value is invertible, i.e. if `x` is coprime with `m`.
     ///
-    /// For fast and prime moduli, the current implementation uses the binary Euclidean algorithm,
-    /// which works in `O(k)`. For power-of-two moduli, it checks `x` if odd.
+    /// The current implementation checks `x % p != 0` for all prime factors `p` of the modulus.
+    /// This is very fast for `PowerK`, relatively fast for `PrimeK`/`BigPrimeK` and slightly slow
+    /// for `FastK`.
     #[must_use]
     fn is_invertible(&self) -> bool;
 
-    /// Compute multiplicative inverse.
+    /// Compute the multiplicative inverse.
     ///
     /// Returns `None` if `x` is not coprime with `m`.
     ///
-    /// For fast and prime moduli, the current implementation uses the iterative binary extended
-    /// Euclidean algorithm, which works in `O(k)`. For power-of-two moduli, it uses [an algorithm
-    /// by Hurchalla][hurchalla], which works in `O(log k)`.
+    /// For power-of-two moduli, the current implementation uses [an algorithm by
+    /// Hurchalla][hurchalla], which works in `O(log k)`. For other moduli, it uses a variation of
+    /// [Pornin's algorithm][pornin], which works in `O(k)`.
     ///
     /// [hurchalla]: https://arxiv.org/abs/2204.04342
+    /// [pornin]: https://eprint.iacr.org/2020/972.pdf
     #[must_use]
     fn inverse(self) -> Option<Self>;
 }

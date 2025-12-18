@@ -4,7 +4,7 @@
 //! a ring balancing the cost of division with the cost of other operations. Different moduli make
 //! different quality vs performance tradeoffs:
 //!
-//! 1. Large prime moduli have the best quality, but operations are quite slow due to the complexity
+//! 1. Big prime moduli have the best quality, but operations are quite slow due to the complexity
 //!    of reduction, even if tricks like [Montgomery multiplication][montgomery] are used.
 //! 2. Primes like `2^61 - 1` can be reduced significantly faster, but they are relatively rare, so
 //!    you can lose several bits of precision compared to the largest prime fitting in the data
@@ -18,15 +18,22 @@
 //! This crate provides a uniform interface to highly optimized implementations of all these moduli,
 //! enabling you to easily try different options and find the best one. The supported moduli are:
 //!
-//! - ["Big" primes](big_prime): `2^8 - 5`, `2^16 - 15`, `2^32 - 5`, `2^64 - 59`.
-//! - [Primes](prime): `2^7 - 1`, `2^13 - 1`, `2^31 - 1`, `2^61 - 1`.
-//! - ["Fast"](fast): `2^8 - 1`, `2^16 - 1`, `2^32 - 1`, `2^64 - 1`.
-//! - [Powers of two](power): `2^8`, `2^16`, `2^32`, `2^64`.
+//! 1. ["Big" primes](big_prime): `2^8 - 5`, `2^16 - 15`, `2^32 - 5`, `2^64 - 59`.
+//! 2. [Primes](prime): `2^7 - 1`, `2^13 - 1`, `2^31 - 1`, `2^61 - 1`.
+//! 3. ["Fast"](fast): `2^8 - 1`, `2^16 - 1`, `2^32 - 1`, `2^64 - 1`.
+//! 4. [Powers of two](power): `2^8`, `2^16`, `2^32`, `2^64`.
 //!
-//! Generally speaking, "fast" moduli pay a cost of 1-3 additional instructions per operation
-//! compared to power-of-two moduli. Multiplication in `prime` is significantly slower than in
-//! `fast`, and other operations are slightly slower. `big_prime` is the slowest of all, having slow
-//! multiplication and shifts.
+//! Generally speaking,
+//!
+//! - Power-of-two moduli are the fastest.
+//! - "Fast" moduli are almost as fast, usually paying a cost of 1-3 additional instructions per
+//!   operation compared to power-of-two moduli, but inversion is much slower. As an exception to
+//!   the general rule that "fast" moduli are faster than primes, "fast" moduli also have the
+//!   slowest implementation of `is_invertible`.
+//! - Moduli in `prime` have significantly slower multiplication, but the rest of arithmetic is
+//!   only slightly slower than that of "fast" moduli.
+//! - Moduli in `big_prime` have even slower multiplication, and the performance of shifts is
+//!   degraded to general-purpose multiplication.
 //!
 //! [thue-morse]: https://en.wikipedia.org/wiki/Thue%E2%80%93Morse_sequence#Hash_collisions
 //! [montgomery]: https://en.wikipedia.org/wiki/Montgomery_modular_multiplication
