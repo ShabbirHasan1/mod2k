@@ -7,3 +7,11 @@ edition = "2024"
 repository = "https://github.com/purplesyringa/mod2k"
 keywords = ["modulo", "modular", "modular-arithmetic"]
 categories = ["algorithms", "mathematics", "no-std", "no-std::no-alloc"]
+
+[[bench]]
+name = "matrix"
+harness = false
+
+[dev-dependencies]
+fastant = "0.1.11"
+fastrand = "2.3.0"
