@@ -19,9 +19,9 @@
 // When we're talking about cheap arithmetic, we mean *really* cheap: if modular subtraction + shift
 // have a total latency of more than ~3 ticks, the core loop will get slowed down, which is worse
 // than wasting constant time on conversion. Option 1 is useful almost exclusively for `Fast64`, and
-// then only because the handling of 64-bit numbers in exgcd is a bit slower than of smaller ones.
+// then only because the handling of 64-bit numbers in XGCD is a bit slower than of smaller ones.
 //
-// A straightforward high-level implementation of exgcd would look like:
+// A straightforward high-level implementation of XGCD would look like:
 //     u = 1
 //     v = 0
 //     while a != 0:
@@ -35,13 +35,13 @@
 //         u -= v
 // ...but we write it slightly differently. First, we reduce the latency of the critical path with
 // the optimization from algorithmica, computing `trailing_zeros` of `a - b` immediately after the
-// right shift, since `trailing_zeros(|a - b|) = trailing_zeros(a - b)`. But in exgcd, this is not
+// right shift, since `trailing_zeros(|a - b|) = trailing_zeros(a - b)`. But in XGCD, this is not
 // the only critical path: there's also the path `swap(u, v)` -> `u -= v` -> `u >>= q`, which is
 // dangerously long for non-trivial implementations of arithmetic. But since we don't actually use
 // `u, v` until later, we can replacing `u >>= q` with `v <<= q` and fix that up in post. This
 // replacement allows `u -= v` and `v <<= q` to be performed in parallel.
 
-macro_rules! define_exgcd_inverse {
+macro_rules! define_inverse {
     // Option 1 from the list above.
     (prime = $prime:literal, builtin) => {
         fn inverse(self) -> Option<Self> {
@@ -258,4 +258,4 @@ macro_rules! define_exgcd_inverse {
         }
     };
 }
-pub(crate) use define_exgcd_inverse;
+pub(crate) use define_inverse;

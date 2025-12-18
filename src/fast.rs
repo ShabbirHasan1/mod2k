@@ -104,7 +104,7 @@ macro_rules! define_type {
                 $factorization.iter().all(|p| self.value % *p != 0)
             }
 
-            crate::exgcd::define_exgcd_inverse!(prime = false, $($inv_strategy)*);
+            crate::xgcd::define_inverse!(prime = false, $($inv_strategy)*);
         }
 
         impl Add for $ty {

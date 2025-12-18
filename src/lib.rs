@@ -65,12 +65,12 @@
 extern crate std;
 
 pub mod big_prime;
-mod exgcd;
 pub mod fast;
 mod macros;
 pub mod power;
 pub mod prime;
 mod traits;
+mod xgcd;
 
 pub use big_prime::*;
 pub use fast::*;

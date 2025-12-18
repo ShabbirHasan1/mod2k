@@ -183,7 +183,7 @@ macro_rules! define_type {
                 self.value != 0
             }
 
-            crate::exgcd::define_exgcd_inverse!(prime = true, $($inv_strategy)*);
+            crate::xgcd::define_inverse!(prime = true, $($inv_strategy)*);
         }
 
         impl Add for $ty {
