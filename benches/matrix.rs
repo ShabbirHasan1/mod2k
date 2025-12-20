@@ -228,90 +228,116 @@ fn main() {
                     .insert(stringify!($ty), measurement);
             };
 
-            // Branchless functions that take and return distinct types -- can reasonably only
-            // measure throughput, since converting types would affect latency.
-            add("new", bencht(|x| $ty::new(x)));
-            add("remainder", bencht(|x: $ty| x.remainder()));
-            add("is 1", bencht(|x: $ty| x.is::<1>()));
-            add("is 100", bencht(|x: $ty| x.is::<100>()));
-            add("is_zero", bencht(|x: $ty| x.is_zero()));
-            add("eq", bencht(|(x, y): ($ty, $ty)| x == y));
+            // // Branchless functions that take and return distinct types -- can reasonably only
+            // // measure throughput, since converting types would affect latency.
+            // add("new", bencht(|x| $ty::new(x)));
+            // add("remainder", bencht(|x: $ty| x.remainder()));
+            // add("is 1", bencht(|x: $ty| x.is::<1>()));
+            // add("is 100", bencht(|x: $ty| x.is::<100>()));
+            // add("is_zero", bencht(|x: $ty| x.is_zero()));
+            // add("eq", bencht(|(x, y): ($ty, $ty)| x == y));
 
-            // Can be adjusted to take and return the same type -- measure latency and throughput.
-            // Use `black_box` to avoid exposing that the two arguments are equal.
-            add("add", benchtl(|x: $ty| x + x.black_box()));
-            add("sub", benchtl(|x: $ty| x - x.black_box()));
-            add("mul", benchtl(|x: $ty| x * x.black_box()));
-            add("negate", benchtl(|x: $ty| -x));
-            add(
-                "shl limited",
-                benchtl(|x: $ty| {
-                    let n = 5u64.black_box();
-                    unsafe {
-                        core::hint::assert_unchecked(n <= 5);
-                    }
-                    x << n
-                }),
-            );
-            #[cfg($shr)]
-            {
-                add(
-                    "shr limited",
-                    benchtl(|x: $ty| {
-                        let n = 5u64.black_box();
-                        unsafe {
-                            core::hint::assert_unchecked(n <= 5);
-                        }
-                        x >> n
-                    }),
-                );
-            }
+            // // Can be adjusted to take and return the same type -- measure latency and throughput.
+            // // Use `black_box` to avoid exposing that the two arguments are equal.
+            // add("add", benchtl(|x: $ty| x + x.black_box()));
+            // add("sub", benchtl(|x: $ty| x - x.black_box()));
+            // add("mul", benchtl(|x: $ty| x * x.black_box()));
+            // add("negate", benchtl(|x: $ty| -x));
+            // add(
+            //     "shl limited",
+            //     benchtl(|x: $ty| {
+            //         let n = 5u64.black_box();
+            //         unsafe {
+            //             core::hint::assert_unchecked(n <= 5);
+            //         }
+            //         x << n
+            //     }),
+            // );
+            // #[cfg($shr)]
+            // {
+            //     add(
+            //         "shr limited",
+            //         benchtl(|x: $ty| {
+            //             let n = 5u64.black_box();
+            //             unsafe {
+            //                 core::hint::assert_unchecked(n <= 5);
+            //             }
+            //             x >> n
+            //         }),
+            //     );
+            // }
 
-            let n: u64;
-            if_eq! {
-                if $worst_shift = branchless {
-                    n = u64::MAX;
-                } else {
-                    n = $worst_shift;
-                }
-            }
-            add("shl", benchtl(|x: $ty| x << n.black_box()));
-            #[cfg($shr)]
-            {
-                add(
-                    "shl negative",
-                    benchtl(|x: $ty| x << n.wrapping_neg().black_box() as i64),
-                );
-                add("shr", benchtl(|x: $ty| x >> n.black_box()));
-                add(
-                    "shr negative",
-                    benchtl(|x: $ty| x >> n.wrapping_neg().black_box() as i64),
-                );
-            }
+            // let n: u64;
+            // if_eq! {
+            //     if $worst_shift = branchless {
+            //         n = u64::MAX;
+            //     } else {
+            //         n = $worst_shift;
+            //     }
+            // }
+            // add("shl", benchtl(|x: $ty| x << n.black_box()));
+            // #[cfg($shr)]
+            // {
+            //     add(
+            //         "shl negative",
+            //         benchtl(|x: $ty| x << n.wrapping_neg().black_box() as i64),
+            //     );
+            //     add("shr", benchtl(|x: $ty| x >> n.black_box()));
+            //     add(
+            //         "shr negative",
+            //         benchtl(|x: $ty| x >> n.wrapping_neg().black_box() as i64),
+            //     );
+            // }
 
-            // `PowerK` optimizes `pow` for even `x`, so force an odd input.
-            let n = u64::MAX.black_box();
-            add("pow", benchtl_with_input($ty::new(1), |x: $ty| x.pow(n)));
+            // // `PowerK` optimizes `pow` for even `x`, so force an odd input.
+            // let n = u64::MAX.black_box();
+            // add("pow", benchtl_with_input($ty::new(1), |x: $ty| x.pow(n)));
 
-            // Ironically, 1 is the worst input for binary GCD. `1^-1 = 1`, so this repeats
-            // indefinitely.
-            add(
-                "inverse worst",
-                benchtl_with_input($ty::ONE.black_box(), |x| x.inverse().unwrap()),
-            );
-            add(
-                "is_invertible worst",
-                bencht_with_input($ty::ONE.black_box(), |x| x.is_invertible()),
-            );
+            // // Ironically, 1 is the worst input for binary GCD. `1^-1 = 1`, so this repeats
+            // // indefinitely.
+            // add(
+            //     "inverse worst",
+            //     benchtl_with_input($ty::ONE.black_box(), |x| x.inverse().unwrap()),
+            // );
+            // add(
+            //     "is_invertible worst",
+            //     bencht_with_input($ty::ONE.black_box(), |x| x.is_invertible()),
+            // );
 
             let mut rng = fastrand::Rng::new();
             add(
                 "inverse random",
                 bencht(|()| $ty::from_seed(rng.u64(..)).inverse()),
             );
+            // add(
+            //     "is_invertible random",
+            //     bencht(|()| $ty::from_seed(rng.u64(..)).is_invertible()),
+            // );
+
             add(
-                "is_invertible random",
-                bencht(|()| $ty::from_seed(rng.u64(..)).is_invertible()),
+                "inverse random (euclid)",
+                bencht(|()| {
+                    let x = $ty::from_seed(rng.u64(..));
+                    if x.is_zero() {
+                        return None;
+                    }
+
+                    let mut r0 = x.to_raw() as u64;
+                    let mut r1 = $ty::MODULUS as u64;
+                    let mut s0: i64 = 1i64;
+                    let mut s1: i64 = 0i64;
+                    while r1 != 0 {
+                        let quotient = r0 / r1;
+                        (r0, r1) = (r1, r0 - quotient * r1);
+                        (s0, s1) = (s1, s0 - quotient as i64 * s1);
+                    }
+                    if r0 == 1 {
+                        let x = $ty::new(s0.unsigned_abs() as <$ty as Mod>::Native);
+                        Some(if s0 >= 0 { x } else { -x })
+                    } else {
+                        None
+                    }
+                }),
             );
         }};
     }
