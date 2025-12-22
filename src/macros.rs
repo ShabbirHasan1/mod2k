@@ -144,10 +144,10 @@ macro_rules! define_type_basics {
                 let mut res = coproduct;
                 let mut tmp = self;
                 while n > 0 {
-                    // This line compiles to cmov. It's important to keep this branchless, because
-                    // otherwise LLVM gets too smart for its own good and generated garbage [1].
+                    // It's important to keep this branchless, because otherwise LLVM gets too smart
+                    // for its own good and generates garbage [1].
                     // [1]: https://github.com/llvm/llvm-project/issues/171671
-                    res *= if n % 2 == 1 { tmp } else { Self::ONE };
+                    res *= core::hint::select_unpredictable(n % 2 == 1, tmp, Self::ONE);
                     tmp *= tmp;
                     n /= 2;
                 }

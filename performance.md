@@ -26,10 +26,10 @@ The performance of `pow` significantly depends on `n`. This table shows timings 
 
 |Time per op (ns)|`big_prime`|`prime`|`fast`|`power`|
 |---|---|---|---|---|
-|8-bit|15|13|6|3|
-|16-bit|28|22|8|6|
-|32-bit|59|45|14|12|
-|64-bit|159|115|26|32|
+|8-bit|15|13|5|3|
+|16-bit|26|20|8|6|
+|32-bit|53|44|13|12|
+|64-bit|148|106|26|25|
 
 The performance of `inverse` significantly depends on the input value. This table shows timings for a random input:
 
