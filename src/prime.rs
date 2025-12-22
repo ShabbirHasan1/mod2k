@@ -13,7 +13,7 @@ use core::ops::{Add, Mul, Neg, Shl, Shr, Sub};
 macro_rules! define_type {
     (
         #[$meta:meta]
-        $ty:ident as $native:ident, $signed:ident,
+        $ty:ident as $native:ident,
         test in $test_mod:ident,
         k = $k:literal,
         long = $long:literal,
@@ -313,7 +313,7 @@ macro_rules! define_type {
         mod $test_mod {
             use super::{Mod, $ty};
 
-            crate::macros::test_ty!($ty as $native, $signed, shr = true);
+            crate::macros::test_ty!($ty as $native, shr = true);
 
             #[test]
             fn raw() {
@@ -328,7 +328,7 @@ macro_rules! define_type {
 
 define_type! {
     /// Arithmetic modulo `2^7 - 1 = 127`.
-    Prime7 as u8, i8,
+    Prime7 as u8,
     test in test7,
     k = 7,
     long = false,
@@ -338,7 +338,7 @@ define_type! {
 
 define_type! {
     /// Arithmetic modulo `2^13 - 1 = 8191`.
-    Prime13 as u16, i16,
+    Prime13 as u16,
     test in test13,
     k = 13,
     long = false,
@@ -348,7 +348,7 @@ define_type! {
 
 define_type! {
     /// Arithmetic modulo `2^31 - 1 = 2147483647`.
-    Prime31 as u32, i32,
+    Prime31 as u32,
     test in test31,
     k = 31,
     long = false,
@@ -358,7 +358,7 @@ define_type! {
 
 define_type! {
     /// Arithmetic modulo `2^61 - 1 = 2305843009213693951`.
-    Prime61 as u64, i64,
+    Prime61 as u64,
     test in test61,
     k = 61,
     long = true,

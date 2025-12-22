@@ -13,7 +13,7 @@ use core::ops::{Add, Mul, Neg, Shl, Shr, Sub};
 macro_rules! define_type {
     (
         #[$meta:meta]
-        $ty:ident as $native:ident, $signed:ident,
+        $ty:ident as $native:ident,
         test in $test_mod:ident,
         d = $d:literal,
         d_order = $d_order:literal,
@@ -305,7 +305,7 @@ macro_rules! define_type {
         mod $test_mod {
             use super::{Mod, $ty};
 
-            crate::macros::test_ty!($ty as $native, $signed, shr = true);
+            crate::macros::test_ty!($ty as $native, shr = true);
             crate::macros::test_exact_raw!($ty as $native);
         }
     };
@@ -313,7 +313,7 @@ macro_rules! define_type {
 
 define_type! {
     /// Arithmetic modulo `2^8 - 5 = 251`.
-    BigPrime8 as u8, i8,
+    BigPrime8 as u8,
     test in test7,
     d = 5,
     d_order = 25,
@@ -324,7 +324,7 @@ define_type! {
 
 define_type! {
     /// Arithmetic modulo `2^16 - 15 = 65521`.
-    BigPrime16 as u16, i16,
+    BigPrime16 as u16,
     test in test13,
     d = 15,
     d_order = 585,
@@ -335,7 +335,7 @@ define_type! {
 
 define_type! {
     /// Arithmetic modulo `2^32 - 5 = 4294967291`.
-    BigPrime32 as u32, i32,
+    BigPrime32 as u32,
     test in test31,
     d = 5,
     d_order = 2147483645,
@@ -346,7 +346,7 @@ define_type! {
 
 define_type! {
     /// Arithmetic modulo `2^64 - 59 = 18446744073709551557`.
-    BigPrime64 as u64, i64,
+    BigPrime64 as u64,
     test in test61,
     d = 59,
     d_order = 4611686018427387889,

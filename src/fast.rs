@@ -10,7 +10,7 @@ use core::ops::{Add, Mul, Neg, Shl, Shr, Sub};
 macro_rules! define_type {
     (
         #[$meta:meta]
-        $ty:ident as $native:ident, $signed:ident,
+        $ty:ident as $native:ident,
         test in $test_mod:ident,
         carmichael = $carmichael:literal,
         factorization = $factorization:expr,
@@ -207,7 +207,7 @@ macro_rules! define_type {
         mod $test_mod {
             use super::{Mod, $ty};
 
-            crate::macros::test_ty!($ty as $native, $signed, shr = true);
+            crate::macros::test_ty!($ty as $native, shr = true);
             crate::macros::test_exact_raw!($ty as $native);
         }
     };
@@ -215,7 +215,7 @@ macro_rules! define_type {
 
 define_type! {
     /// Arithmetic modulo `2^8 - 1 = 3 * 5 * 17`.
-    Fast8 as u8, i8,
+    Fast8 as u8,
     test in test8,
     carmichael = 16,
     factorization = [3, 5, 17],
@@ -224,7 +224,7 @@ define_type! {
 
 define_type! {
     /// Arithmetic modulo `2^16 - 1 = 3 * 5 * 17 * 257`.
-    Fast16 as u16, i16,
+    Fast16 as u16,
     test in test16,
     carmichael = 256,
     factorization = [3, 5, 17, 257],
@@ -233,7 +233,7 @@ define_type! {
 
 define_type! {
     /// Arithmetic modulo `2^32 - 1 = 3 * 5 * 17 * 257 * 65537`.
-    Fast32 as u32, i32,
+    Fast32 as u32,
     test in test32,
     carmichael = 65536,
     factorization = [3, 5, 17, 257, 65537],
@@ -242,7 +242,7 @@ define_type! {
 
 define_type! {
     /// Arithmetic modulo `2^64 - 1 = 3 * 5 * 17 * 257 * 641 * 65537 * 6700417`.
-    Fast64 as u64, i64,
+    Fast64 as u64,
     test in test64,
     carmichael = 17153064960,
     factorization = [3, 5, 17, 257, 641, 65537, 6700417],

@@ -262,7 +262,7 @@ pub(crate) use define_type_basics;
 
 #[cfg(test)]
 macro_rules! test_ty {
-    ($ty:ident as $native:ident, $signed:ident, shr = $shr:tt) => {
+    ($ty:ident as $native:ident, shr = $shr:tt) => {
         fn raw_numbers() -> impl Iterator<Item = $native> {
             let edge_cases = (-5i32..=5).map(|x| x as $native);
 

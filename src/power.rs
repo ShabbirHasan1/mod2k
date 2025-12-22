@@ -29,11 +29,7 @@ static INV8: [u8; 128] = {
 };
 
 macro_rules! define_type {
-    (
-        #[$meta:meta]
-        $ty:ident as $native:ident, $signed:ident,
-        test in $test_mod:ident
-    ) => {
+    (#[$meta:meta] $ty:ident as $native:ident, test in $test_mod:ident) => {
         // The `value` field stores the remainder.
         crate::macros::define_type_basics! {
             #[$meta]
@@ -187,7 +183,7 @@ macro_rules! define_type {
         mod $test_mod {
             use super::{Mod, $ty};
 
-            crate::macros::test_ty!($ty as $native, $signed, shr = false);
+            crate::macros::test_ty!($ty as $native, shr = false);
             crate::macros::test_exact_raw!($ty as $native);
         }
     };
@@ -195,22 +191,22 @@ macro_rules! define_type {
 
 define_type! {
     /// Arithmetic modulo `2^8 = 256`.
-    Power8 as u8, i8, test in test8
+    Power8 as u8, test in test8
 }
 
 define_type! {
     /// Arithmetic modulo `2^16 = 65536`.
-    Power16 as u16, i16, test in test16
+    Power16 as u16, test in test16
 }
 
 define_type! {
     /// Arithmetic modulo `2^32 = 4294967296`.
-    Power32 as u32, i32, test in test32
+    Power32 as u32, test in test32
 }
 
 define_type! {
     /// Arithmetic modulo `2^64 = 18446744073709551616`.
-    Power64 as u64, i64, test in test64
+    Power64 as u64, test in test64
 }
 
 #[cfg(doctest)]
