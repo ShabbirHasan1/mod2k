@@ -23,7 +23,7 @@
 //! 3. ["Fast"](fast): `2^8 - 1`, `2^16 - 1`, `2^32 - 1`, `2^64 - 1`.
 //! 4. [Powers of two](power): `2^8`, `2^16`, `2^32`, `2^64`.
 //!
-//! Generally speaking,
+//! A [performance comparison][performance] table is available. Generally speaking,
 //!
 //! - Power-of-two moduli are the fastest.
 //! - "Fast" moduli are almost as fast, usually paying a cost of 1-3 additional instructions per
@@ -35,9 +35,9 @@
 //! - Moduli in `big_prime` have even slower multiplication, and the performance of shifts is
 //!   degraded to general-purpose multiplication.
 //!
-//! [thue-morse]: https://en.wikipedia.org/wiki/Thue%E2%80%93Morse_sequence#Hash_collisions
 //! [montgomery]: https://en.wikipedia.org/wiki/Montgomery_modular_multiplication
-//! [num-modular]: https://docs.rs/num-modular/latest/num_modular/
+//! [thue-morse]: https://en.wikipedia.org/wiki/Thue%E2%80%93Morse_sequence#Hash_collisions
+//! [performance]: https://github.com/purplesyringa/mod2k/blob/master/performance.md
 //!
 //!
 //! ## API
@@ -53,8 +53,8 @@
 //!   ideally computed once and then reused.
 //! - `pow` computes exponents.
 //! - `<<` and `>>` correspond to multiplication and division by powers of two, respectively.
-//!   Arbitrarily large and negative shift amounts are supported. (Division is not supported for
-//!   `2^k` moduli.)
+//!   Arbitrarily large shift amounts are supported. Negative amounts correspond to the opposite
+//!   operation. (Division is not supported for `2^k` moduli.)
 //! - `==` performs modular comparison.
 //! - [`Display`](core::fmt::Display) and related traits print the remainder.
 //!
