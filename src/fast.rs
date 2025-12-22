@@ -190,7 +190,7 @@ macro_rules! define_type {
                 let diff = diff.wrapping_sub(borrow as $native);
                 // Optimize comparison against a constant. This still produces suboptimal results
                 // (`sub + sbb + sete` instead of `cmp + sete`) [1], but it's better than nothing.
-                // [1]: github.com/llvm/llvm-project/issues/171676
+                // [1]: https://github.com/llvm/llvm-project/issues/171676
                 if other.value != 0 {
                     // SAFETY: If no overflow happened, `diff < self.value` and thus `diff < MAX`.
                     // If overflow happened, initially `diff != 0`, so subtracting 1 cannot give
