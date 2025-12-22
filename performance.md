@@ -35,7 +35,7 @@ The performance of `inverse` significantly depends on the input value. This tabl
 
 |Time per op (ns)|`big_prime`|`prime`|`fast`|`power`|
 |---|---|---|---|---|
-|8-bit|9|9|10|0.38 / 1.24|
-|16-bit|17|15|18|0.50 / 1.71|
-|32-bit|35|39|36|0.76 / 2.03|
-|64-bit|69|68|55|1.02 / 2.42|
+|8-bit|9|9|10|0.19 / 0.76|
+|16-bit|17|15|18|0.38 / 1.80|
+|32-bit|35|39|36|0.50 / 2.34|
+|64-bit|69|68|55|0.75 / 2.73|

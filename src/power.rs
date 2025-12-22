@@ -10,6 +10,24 @@
 use super::Mod;
 use core::ops::{Add, Mul, Neg, Shl, Sub};
 
+// 8-bit inverses of invertible values.
+static INV8: [u8; 128] = {
+    let mut table = [0; 128];
+    let mut i = 0;
+    while i < 128 {
+        let a: u8 = 2 * i + 1;
+        // This seeds the algorithm with 5 bits of precision, according to [1].
+        // [1]: https://arxiv.org/pdf/1303.0328
+        let x = a.wrapping_mul(3) ^ 2;
+        // One iteration of Hensel lifting suffices.
+        let inv = x.wrapping_mul(2u8.wrapping_sub(a.wrapping_mul(x)));
+        assert!(inv.wrapping_mul(a) == 1);
+        table[i as usize] = inv;
+        i += 1
+    }
+    table
+};
+
 macro_rules! define_type {
     (
         #[$meta:meta]
@@ -88,11 +106,9 @@ macro_rules! define_type {
                 if self.value & 1 == 0 {
                     return None;
                 }
-                // This seeds the algorithm with 5 bits of precision, according to [1].
-                // [1]: https://arxiv.org/pdf/1303.0328
-                let mut x = Self::new(self.value.wrapping_mul(3) ^ 2);
+                let mut x = Self::new(INV8[((self.value & 0xff) >> 1) as usize] as $native);
                 let mut y = Self::ONE - self * x;
-                for _ in 2..$native::BITS.ilog2() {
+                for _ in 3..$native::BITS.ilog2() {
                     x *= Self::ONE + y;
                     y *= y;
                 }
