@@ -12,3 +12,7 @@ This crate provides a uniform interface for fast implementations of multiple mod
 - Primes: `2^7 - 1`, `2^13 - 1`, `2^31 - 1`, `2^61 - 1`. Medium performance (~10 insn per multiplication, ~5 insn per addition), excellent quality (but slightly fewer bits of precision compared to "big" primes).
 - "Fast": `2^8 - 1`, `2^16 - 1`, `2^32 - 1`, `2^64 - 1`. Great performance (~4 insn per multiplication, ~2 insn per addition), medium quality (the moduli have relatively big prime factors).
 - Powers of two: `2^8`, `2^16`, `2^32`, `2^64`. Fastest (1 insn per multiplication and addition), but [have seed-independent collisions](https://en.wikipedia.org/wiki/Thue%E2%80%93Morse_sequence#Hash_collisions) and do not support division by `2`.
+
+`mod2k` is estimated to be ~2x faster than general-purpose modular arithmetic libraries on average, and more specific performance information [is available](./performance.md).
+
+Check [the docs](https://docs.rs/mod2k) for more information.

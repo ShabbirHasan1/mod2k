@@ -23,16 +23,17 @@
 //! 3. ["Fast"](fast): `2^8 - 1`, `2^16 - 1`, `2^32 - 1`, `2^64 - 1`.
 //! 4. [Powers of two](power): `2^8`, `2^16`, `2^32`, `2^64`.
 //!
-//! A [performance comparison][performance] table is available. Generally speaking,
+//! A [performance comparison][performance] table is available. `mod2k` is estimated to be ~2x
+//! faster than general-purpose modular arithmetic libraries on average. More specifically,
 //!
 //! - Power-of-two moduli are the fastest.
 //! - "Fast" moduli are almost as fast, usually paying a cost of 1-3 additional instructions per
 //!   operation compared to power-of-two moduli, but inversion is much slower. As an exception to
 //!   the general rule that "fast" moduli are faster than primes, "fast" moduli also have the
 //!   slowest implementation of `is_invertible`.
-//! - Moduli in `prime` have significantly slower multiplication, but the rest of arithmetic is
+//! - Moduli in [`prime`] have significantly slower multiplication, but the rest of arithmetic is
 //!   only slightly slower than that of "fast" moduli.
-//! - Moduli in `big_prime` have even slower multiplication, and the performance of shifts is
+//! - Moduli in [`big_prime`] have even slower multiplication, and the performance of shifts is
 //!   degraded to general-purpose multiplication.
 //!
 //! [montgomery]: https://en.wikipedia.org/wiki/Montgomery_modular_multiplication
